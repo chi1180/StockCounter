@@ -17,14 +17,14 @@ export default function BarChartGraph({ data, goods }: LineChartGraphProps) {
   const graphData = [];
   for (const good of goods) {
     console.log(`[--DEBUG--] good is ${good}`);
-    const good_info = {};
+    const good_info: { [key: string]: number } = {};
     good_info[good] = 0;
 
     for (const info of data) {
       console.log(`[--DEBUG--] info is ${JSON.stringify(info)}`);
       if (info[good]) good_info[good] += info[good] as number;
     }
-    good_info["count"] = good_info[good];
+    good_info.count = good_info[good];
     graphData.push(good_info);
   }
 

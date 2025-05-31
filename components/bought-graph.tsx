@@ -23,18 +23,32 @@ export default function BoughtGraph() {
 
     fetchData();
 
-    const interval = setInterval(fetchData, 1000 * 3);
-    return () => clearInterval(interval);
+    // const interval = setInterval(fetchData, 1000 * 3);
+    // return () => clearInterval(interval);
   }, []);
 
   if (data) {
-    if (data.at(0) && data.at(1))
+    if (data.at(0) && data.at(1)) {
       return (
-        <div className="w-fit h-fit bg-(--light) p-12 rounded-lg">
-          <LineChartGraph data={data.at(0)} goods={data.at(1)} />
-          <BarChartGraph data={data.at(0)} goods={data.at(1)} />
-        </div>
+        <>
+          <div className="flex items-center gap-2 py-12">
+            <div className="h-14 w-1.5 bg-(--accent-normal)" />
+            <h2 className="text-4xl">売上推移</h2>
+          </div>
+          <div className="bg-(--light) p-12 rounded-lg">
+            <LineChartGraph data={data.at(0)} goods={data.at(1)} />
+          </div>
+          {/* sep */}
+          <div className="flex items-center gap-2 py-12">
+            <div className="h-14 w-1.5 bg-(--accent-normal)" />
+            <h2 className="text-4xl">売上合計</h2>
+          </div>
+          <div className="bg-(--light) p-12 rounded-lg">
+            <BarChartGraph data={data.at(0)} goods={data.at(1)} />
+          </div>
+        </>
       );
+    }
   }
 
   return <></>;

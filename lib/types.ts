@@ -11,3 +11,9 @@ export type BoughtType = {
     count: string;
   };
 };
+
+export type StockType = {
+  name: string;
+  price: number;
+  all: number;
+};

@@ -20,7 +20,7 @@ export default function LineChartGraph({ data, goods }: LineChartGraphProps) {
 
   let width = 800;
   if (typeof window !== "undefined" && window.screen.width < width)
-    width = window.screen.width;
+    width = window.screen.width - 72;
 
   return (
     <LineChart

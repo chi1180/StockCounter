@@ -20,22 +20,14 @@ export default function Header() {
   ];
 
   const [selected, setSelected] = useState("/");
-  const [scrolled, setScrolled] = useState(false);
-  const scrollHandler = () => {
-    setScrolled(window.scrollY > 0);
-  };
   useEffect(() => {
     if (typeof window !== "undefined") {
       setSelected(window.location.pathname);
-
-      document.addEventListener("scrollend", scrollHandler);
     }
-
-    return () => removeEventListener("scroll", scrollHandler);
-  });
+  }, []);
 
   return (
-    <header className="w-full h-28 py-4 px-8 flex items-center justify-around">
+    <header className="w-full h-28 py-4 px-8 flex items-center justify-around sticky top-0 z-50">
       <div className="h-full flex items-center gap-4">
         <div className="h-full aspect-square bg-[url('/logo.png')]  bg-cover bg-center rounded-md" />
         <h2 className="text-5xl">Stock counter</h2>
@@ -48,7 +40,7 @@ export default function Header() {
               <li key={section.title}>
                 <Link
                   href={section.path}
-                  className={`text-xl ${selected === section.path ? "text-(--accent-normal) font-semibold" : ""} ${scrolled ? "shadow-md" : ""}`}
+                  className={`text-xl ${selected === section.path ? "text-(--accent-normal) font-semibold" : ""}`}
                 >
                   {section.title}
                 </Link>

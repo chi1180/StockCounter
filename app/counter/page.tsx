@@ -11,32 +11,26 @@ export default function Counter() {
   const [stocks, setStocks] = useState<GoodsType>();
   const [isProcessing, setIsProcessing] = useState<Set<string>>(new Set());
   const isUpdating = useRef(0);
-  const abortControllerRef = useRef<AbortController | null>(null);
+  const fetchIdRef = useRef(0); // リクエストIDを管理
 
   const fetchData = useCallback(async (forceUpdate = false) => {
     if (!forceUpdate && isUpdating.current > 0) return;
 
-    // 前回のリクエストをキャンセル
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-
-    // 新しいAbortControllerを作成
-    const abortController = new AbortController();
-    abortControllerRef.current = abortController;
+    // 新しいリクエストIDを生成
+    const currentFetchId = ++fetchIdRef.current;
+    console.log(`[--DEBUG--] Starting fetchData with ID: ${currentFetchId}`);
 
     try {
-      const apiResponse = await fetch("/api/database?for=stocks-counter", {
-        signal: abortController.signal,
-      });
-
-      // リクエストがキャンセルされた場合は処理を停止
-      if (abortController.signal.aborted) {
-        console.log("[--DEBUG--] Fetch request was aborted");
-        return;
-      }
-
+      const apiResponse = await fetch("/api/database?for=stocks-counter");
       const result = await apiResponse.json();
+
+      // レスポンス到着時点で、より新しいリクエストが発行されていないかチェック
+      if (currentFetchId !== fetchIdRef.current) {
+        console.log(
+          `[--DEBUG--] Ignoring outdated fetch result (ID: ${currentFetchId}, current: ${fetchIdRef.current})`,
+        );
+        return; // 古いレスポンスは無視
+      }
 
       if (apiResponse.status === 200) {
         if (result.stocks && result.logs) {
@@ -48,7 +42,9 @@ export default function Counter() {
             }
           }
 
-          console.log("[--DEBUG--] Applying latest fetch result");
+          console.log(
+            `[--DEBUG--] Applying fetch result (ID: ${currentFetchId})`,
+          );
           setStocks(result.stocks.goods);
         }
       } else {
@@ -57,10 +53,6 @@ export default function Counter() {
         );
       }
     } catch (error) {
-      if (error.name === "AbortError") {
-        console.log("[--DEBUG--] Fetch was aborted");
-        return;
-      }
       console.error("[--ERROR--] Failed to fetch data:", error);
     }
   }, []);
@@ -68,7 +60,7 @@ export default function Counter() {
   useEffect(() => {
     fetchData();
 
-    if (process.env.NODE_ENV !== "development") {
+    if (process.env.NODE_ENV === "development") {
       const interval = setInterval(fetchData, 1000);
       return () => clearInterval(interval);
     }

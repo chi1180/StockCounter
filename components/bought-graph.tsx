@@ -28,7 +28,7 @@ export default function BoughtGraph() {
     fetchData();
 
     if (process.env.NODE_ENV !== "development") {
-      const interval = setInterval(fetchData, 1000 * 3);
+      const interval = setInterval(fetchData, 1000);
       return () => clearInterval(interval);
     }
   }, []);
@@ -45,7 +45,7 @@ export default function BoughtGraph() {
         <div className="h-14 w-1.5 bg-(--accent-normal)" />
         <h2 className="text-4xl">売上推移</h2>
       </div>
-      <div className="bg-(--light) p-12 rounded-lg">
+      <div className="bg-(--light) p-12 pb-0 rounded-lg">
         <LineChartGraph data={boughtData} goods={goods} />
       </div>
       {/* sep */}
@@ -53,7 +53,7 @@ export default function BoughtGraph() {
         <div className="h-14 w-1.5 bg-(--accent-normal)" />
         <h2 className="text-4xl">売上合計</h2>
       </div>
-      <div className="bg-(--light) p-12 rounded-lg">
+      <div className="bg-(--light) p-12 pb-0 rounded-lg">
         <BarChartGraph data={boughtData} goods={goods} />
       </div>
     </>

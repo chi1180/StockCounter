@@ -2,7 +2,6 @@ import { MongoClient } from "mongodb";
 import type { LogType } from "../types";
 import { uri } from "./init";
 import { get } from "./get";
-import { remove } from "./remove";
 
 export default async function uploadLog(new_log: LogType) {
   const client = new MongoClient(uri);
@@ -13,9 +12,10 @@ export default async function uploadLog(new_log: LogType) {
 
     const existingLogData = await get({ type: "bought" });
     let sameTimeExisted = false;
+    const updatedLogs = [...existingLogData.logs];
 
-    for (const log of existingLogData.logs) {
-      if (new_log.time === log.time) {
+    for (const log of updatedLogs) {
+      if (new Date(new_log.time).getTime() === new Date(log.time).getTime()) {
         sameTimeExisted = true;
 
         for (const [key, val] of Object.entries(new_log.counts)) {
@@ -29,14 +29,20 @@ export default async function uploadLog(new_log: LogType) {
     }
 
     if (!sameTimeExisted) {
-      existingLogData.logs.push(new_log);
+      updatedLogs.push(new_log);
     }
 
-    console.log(`[--DEBUG--] New logs is ${JSON.stringify(existingLogData)}`);
+    const result = await collection.updateOne(
+      { type: "bought" },
+      {
+        $set: {
+          type: "bought",
+          logs: updatedLogs,
+        },
+      },
+      { upsert: true },
+    );
 
-    await remove({ type: "bought" });
-
-    const result = await collection.insertOne(existingLogData);
     return result;
   } catch (error) {
     console.log(`[--ERROR--] Failed to uploadLog\n${error}`);

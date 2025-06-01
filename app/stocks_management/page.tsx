@@ -28,7 +28,7 @@ export default function StocksManaagement() {
     fetchData();
 
     if (process.env.NODE_ENV !== "development") {
-      const interval = setInterval(fetchData, 1000 * 3);
+      const interval = setInterval(fetchData, 1000);
       return () => clearInterval(interval);
     }
   }, []);

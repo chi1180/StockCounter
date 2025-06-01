@@ -16,8 +16,6 @@ export async function GET(request: NextRequest) {
         const bought = await get({ type: "bought" });
         const logs = bought?.logs || [];
 
-        console.log(`[--DEBUG--] bought is ${JSON.stringify(bought)}`);
-
         const good_names: Array<string> = [];
         const graphData: MutableDataPoint[] = [];
 
@@ -47,10 +45,6 @@ export async function GET(request: NextRequest) {
             }
           }
         }
-
-        console.log(
-          `[--DEBUG--] Data is ${JSON.stringify([graphData, good_names])}`,
-        );
 
         return new Response(
           JSON.stringify({

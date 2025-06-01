@@ -11,13 +11,33 @@ export default function Counter() {
   const [stocks, setStocks] = useState<GoodsType>();
   const [isProcessing, setIsProcessing] = useState<Set<string>>(new Set());
   const isUpdating = useRef(0);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  const fetchData = useCallback(async () => {
-    if (isUpdating.current > 0) return;
+  const fetchData = useCallback(async (forceUpdate = false) => {
+    if (!forceUpdate && isUpdating.current > 0) return;
+
+    // 前回のリクエストをキャンセル
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // 新しいAbortControllerを作成
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
 
     try {
-      const apiResponse = await fetch("/api/database?for=stocks-counter");
+      const apiResponse = await fetch("/api/database?for=stocks-counter", {
+        signal: abortController.signal,
+      });
+
+      // リクエストがキャンセルされた場合は処理を停止
+      if (abortController.signal.aborted) {
+        console.log("[--DEBUG--] Fetch request was aborted");
+        return;
+      }
+
       const result = await apiResponse.json();
+
       if (apiResponse.status === 200) {
         if (result.stocks && result.logs) {
           for (const stock of result.stocks.goods) {
@@ -28,6 +48,7 @@ export default function Counter() {
             }
           }
 
+          console.log("[--DEBUG--] Applying latest fetch result");
           setStocks(result.stocks.goods);
         }
       } else {
@@ -36,6 +57,10 @@ export default function Counter() {
         );
       }
     } catch (error) {
+      if (error.name === "AbortError") {
+        console.log("[--DEBUG--] Fetch was aborted");
+        return;
+      }
       console.error("[--ERROR--] Failed to fetch data:", error);
     }
   }, []);

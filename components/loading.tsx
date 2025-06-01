@@ -1,6 +1,5 @@
 "use client";
 
-import { setInterval } from "node:timers";
 import { useEffect, useState } from "react";
 
 export default function Loading() {

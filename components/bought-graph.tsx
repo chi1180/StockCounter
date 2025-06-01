@@ -4,6 +4,7 @@ import LineChartGraph from "./LineChartGraph";
 import { useEffect, useState } from "react";
 import BarChartGraph from "./BarChartGraph";
 import type { MutableDataPoint } from "./props";
+import Loading from "./loading";
 
 // Update DataTuple to use array of BoughtType
 type DataTuple = [MutableDataPoint[], Array<string>];
@@ -31,7 +32,7 @@ export default function BoughtGraph() {
   }, []);
 
   if (!data) {
-    return null;
+    return <Loading />;
   }
 
   const [boughtData, goods] = data;

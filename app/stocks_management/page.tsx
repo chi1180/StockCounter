@@ -1,6 +1,7 @@
 "use client";
 
 import Header from "@/components/header";
+import Loading from "@/components/loading";
 import type { GoodsType, StockType } from "@/lib/types";
 import { useEffect, useState } from "react";
 
@@ -259,7 +260,12 @@ export default function StocksManaagement() {
     );
   }
 
-  return <Header />;
+  return (
+    <>
+      <Header />
+      <Loading />
+    </>
+  );
 }
 
 async function newStockClickHandler(

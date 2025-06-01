@@ -1,7 +1,8 @@
 "use client";
 
 import Header from "@/components/header";
-import type { GoodsType, LogType } from "@/lib/types";
+import Loading from "@/components/loading";
+import type { boughtLogsType, GoodsType, LogType } from "@/lib/types";
 import { useEffect, useState } from "react";
 
 export default function Counter() {
@@ -9,13 +10,26 @@ export default function Counter() {
   const [tab, setTab] = useState("");
 
   const [stocks, setStocks] = useState<GoodsType>();
+  const [logs, setLogs] = useState<boughtLogsType>();
 
   useEffect(() => {
     const fetchData = async () => {
-      const apiResponse = await fetch("/api/database?for=stocks-view");
+      const apiResponse = await fetch("/api/database?for=stocks-counter");
       const result = await apiResponse.json();
       if (apiResponse.status === 200) {
-        if (result.stocks) setStocks(result.stocks.goods);
+        if (result.stocks && result.logs) {
+          setLogs(result.logs.logs);
+
+          for (const stock of result.stocks.goods) {
+            for (const log of result.logs.logs) {
+              if (log.counts[stock.name]) {
+                stock.all -= log.counts[stock.name];
+              }
+            }
+          }
+
+          setStocks(result.stocks.goods);
+        }
       } else {
         console.log(
           `[--ERROR--] Erroed in stocks-view fetchData\n${result.error}`,
@@ -171,7 +185,7 @@ export default function Counter() {
           </div>
         </main>
       ) : (
-        <></>
+        <Loading />
       )}
     </>
   );

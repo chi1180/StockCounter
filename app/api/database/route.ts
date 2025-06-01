@@ -92,6 +92,31 @@ export async function GET(request: NextRequest) {
           headers: { "Content-Type": "application/json" },
         });
       }
+
+    case "stocks-counter":
+      try {
+        const goods_data = await get({ type: "goods" });
+        const bought_data = await get({ type: "bought" });
+
+        return new Response(
+          JSON.stringify({
+            stocks: goods_data,
+            logs: bought_data,
+          }),
+          {
+            status: 200,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          },
+        );
+      } catch (error) {
+        console.log("Error in stocks-counter API route:", error);
+        return new Response(JSON.stringify({ error: error }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
   }
 }
 

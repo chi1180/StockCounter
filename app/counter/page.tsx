@@ -39,8 +39,10 @@ export default function Counter() {
 
     fetchData();
 
-    // const interval = setInterval(fetchData, 1000 * 3);
-    // return () => clearInterval(interval);
+    if (process.env.NODE_ENV !== "development") {
+      const interval = setInterval(fetchData, 1000 * 3);
+      return () => clearInterval(interval);
+    }
   }, []);
 
   async function decreaseStock(targetName: string) {

@@ -27,8 +27,10 @@ export default function BoughtGraph() {
 
     fetchData();
 
-    // const interval = setInterval(fetchData, 1000 * 3);
-    // return () => clearInterval(interval);
+    if (process.env.NODE_ENV !== "development") {
+      const interval = setInterval(fetchData, 1000 * 3);
+      return () => clearInterval(interval);
+    }
   }, []);
 
   if (!data) {

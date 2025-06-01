@@ -1,14 +1,4 @@
-import {
-  ResponsiveContainer,
-  BarChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  Bar,
-  Rectangle,
-} from "recharts";
+import { BarChart, CartesianGrid, YAxis, Tooltip, Legend, Bar } from "recharts";
 import type { LineChartGraphProps } from "./props";
 import { Colors } from "./colors";
 import { colorSchameGenerator } from "@/lib/chrome/color-schame-generator";

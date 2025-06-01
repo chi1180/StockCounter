@@ -1,5 +1,3 @@
-export const runtime = "edge";
-
 import type { MutableDataPoint } from "@/components/props";
 import { get } from "@/lib/mongo-db/get";
 import { insert } from "@/lib/mongo-db/insert";

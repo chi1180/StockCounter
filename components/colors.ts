@@ -1,5 +1,3 @@
-export const runtime = "edge";
-
 const Colors = {
   font: "#1a1a1a",
   light: "#eaeaea",

@@ -1,8 +1,4 @@
-export type GoodsType = {
-  name: string;
-  price: number;
-  all: number;
-}[];
+export type GoodsType = StockType[];
 
 export type BoughtType = {
   name: string;
@@ -16,4 +12,18 @@ export type StockType = {
   name: string;
   price: number;
   all: number;
+};
+
+export type GoodsInfoType = {
+  type: "goods";
+  goods: GoodsType;
+};
+
+export type boughtLogsType = LogType[];
+
+export type LogType = {
+  time: Date;
+  counts: {
+    [key: string]: number;
+  };
 };

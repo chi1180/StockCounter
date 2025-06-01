@@ -1,6 +1,7 @@
 import type { MutableDataPoint } from "@/components/props";
 import { get } from "@/lib/mongo-db/get";
 import { insert } from "@/lib/mongo-db/insert";
+import uploadLog from "@/lib/mongo-db/uploadLog";
 import type { GoodsType } from "@/lib/types";
 import type { NextRequest } from "next/server";
 
@@ -15,8 +16,10 @@ export async function GET(request: NextRequest) {
         const bought = await get({ type: "bought" });
         const logs = bought?.logs || [];
 
+        console.log(`[--DEBUG--] bought is ${JSON.stringify(bought)}`);
+
         const good_names: Array<string> = [];
-        const graphData = [];
+        const graphData: MutableDataPoint[] = [];
 
         if (logs?.length > 0) {
           for (const log of logs) {
@@ -44,6 +47,10 @@ export async function GET(request: NextRequest) {
             }
           }
         }
+
+        console.log(
+          `[--DEBUG--] Data is ${JSON.stringify([graphData, good_names])}`,
+        );
 
         return new Response(
           JSON.stringify({
@@ -92,16 +99,19 @@ export async function POST(request: NextRequest) {
   try {
     const { type, data } = await request.json();
 
-    console.log("受信したデータ:", JSON.stringify([type, data]));
+    console.log("POSTed data:", JSON.stringify([type, data]));
 
     switch (type) {
       case "goods":
-        insert(type, data);
+        insert(type, data.data, data?.is_exist, data?.is_delete);
+        break;
+      case "log":
+        uploadLog(data);
         break;
     }
 
     return Response.json({
-      message: "データを正常に受信しました",
+      message: "Got data correctly",
       receivedData: { type, data },
     });
   } catch (error) {

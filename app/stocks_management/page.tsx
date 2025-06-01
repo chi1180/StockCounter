@@ -1,7 +1,7 @@
 "use client";
 
 import Header from "@/components/header";
-import type { StockType } from "@/lib/types";
+import type { GoodsType, StockType } from "@/lib/types";
 import { useEffect, useState } from "react";
 
 export default function StocksManaagement() {
@@ -9,7 +9,7 @@ export default function StocksManaagement() {
   if (typeof window !== "undefined" && window.screen.width < width)
     width = window.screen.width - 72;
 
-  const [data, setData] = useState<StockType[]>();
+  const [data, setData] = useState<GoodsType>();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -45,7 +45,9 @@ export default function StocksManaagement() {
 
   if (data) {
     return (
-      <>
+      <div
+        className={`w-screen ${dialog.name ? "h-screen overflow-hidden" : "h-full"}`}
+      >
         <Header />
 
         <main className="p-6">
@@ -92,7 +94,13 @@ export default function StocksManaagement() {
                 <button
                   type="button"
                   className="bg-(--accent-normal) text-white transition-all duration-300 hover:opacity-60"
-                  onClick={() => newStockCliclHandler()}
+                  onClick={() => {
+                    const goods: Array<string> = [];
+                    for (const stock of data) {
+                      goods.push(stock.name);
+                    }
+                    newStockClickHandler(goods, "new");
+                  }}
                 >
                   登録
                 </button>
@@ -150,7 +158,9 @@ export default function StocksManaagement() {
               <p className="text-2xl pl-2">商品名</p>
               <input
                 type="text"
+                id="exist_stock_input_name"
                 value={formData.name}
+                readOnly={true}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
@@ -166,6 +176,7 @@ export default function StocksManaagement() {
                   <p className="text-2xl pl-2">価格</p>
                   <input
                     type="number"
+                    id="exist_stock_input_price"
                     value={formData.price}
                     onChange={(e) =>
                       setFormData({
@@ -182,6 +193,7 @@ export default function StocksManaagement() {
                   <p className="text-2xl pl-2">個数</p>
                   <input
                     type="number"
+                    id="exist_stock_input_all"
                     value={formData.all}
                     onChange={(e) =>
                       setFormData({
@@ -198,6 +210,22 @@ export default function StocksManaagement() {
               <div className="pt-16 flex gap-4 justify-end *:w-30 *:h-16 *:rounded-md *:text-xl *:font-medium">
                 <button
                   type="button"
+                  className="bg-(--accent-normal) text-white transition-all duration-300 hover:opacity-60"
+                  onClick={() => {
+                    console.log("保存データ:", formData);
+                    const goods: Array<string> = [];
+                    for (const stock of data) {
+                      goods.push(stock.name);
+                    }
+                    newStockClickHandler(goods, "exist");
+                    setDialog(initialDialog);
+                    setFormData(initialDialog);
+                  }}
+                >
+                  保存
+                </button>
+                <button
+                  type="button"
                   className="bg-(--base) transition-all duration-300 hover:opacity-60"
                   onClick={() => {
                     setDialog(initialDialog);
@@ -208,35 +236,44 @@ export default function StocksManaagement() {
                 </button>
                 <button
                   type="button"
-                  className="bg-(--accent-normal) text-white transition-all duration-300 hover:opacity-60"
+                  className="bg-(--accent-warn) text-white transition-all duration-300 hover:opacity-100 opacity-60"
                   onClick={() => {
-                    console.log("保存データ:", formData);
-                    setDialog(initialDialog);
-                    setFormData(initialDialog);
+                    const isCertain = confirm(
+                      `登録済みの商品「${formData.name}」を削除しますか？`,
+                    );
+                    if (isCertain) {
+                      console.log("削除データ:", formData);
+                      deleteStock(formData);
+                      setDialog(initialDialog);
+                      setFormData(initialDialog);
+                    }
                   }}
                 >
-                  保存
+                  削除
                 </button>
               </div>
             </div>
           </div>
         </div>
-      </>
+      </div>
     );
   }
 
   return <Header />;
 }
 
-async function newStockCliclHandler() {
+async function newStockClickHandler(
+  goods: Array<string>,
+  src: "exist" | "new",
+) {
   const name = document.getElementById(
-    "new_stock_input_name",
+    `${src}_stock_input_name`,
   ) as HTMLInputElement;
   const price = document.getElementById(
-    "new_stock_input_price",
+    `${src}_stock_input_price`,
   ) as HTMLInputElement;
   const all = document.getElementById(
-    "new_stock_input_all",
+    `${src}_stock_input_all`,
   ) as HTMLInputElement;
 
   if (name.value.trim() === "") {
@@ -245,8 +282,14 @@ async function newStockCliclHandler() {
     alert("価格には半角数字のみを入力してください。");
   } else if (!/^\d+$/.test(all.value)) {
     alert("個数には半角数字のみを入力してください");
+  } else if (goods.includes(name.value) && src !== "exist") {
+    alert(`そちらの商品名は既に登録されています。\n商品名：${name.value}`);
   } else {
-    alert(`Saved :)\n${[name.value, price.value, all.value].join(", ")}`);
+    const stockInfo: StockType = {
+      name: name.value,
+      price: Number.parseInt(price.value),
+      all: Number.parseInt(all.value),
+    };
 
     const response = await fetch("/api/database", {
       method: "POST",
@@ -256,9 +299,8 @@ async function newStockCliclHandler() {
       body: JSON.stringify({
         type: "goods",
         data: {
-          name: name.value,
-          price: price.value,
-          all: all.value,
+          is_exist: src === "exist",
+          data: stockInfo,
         },
       }),
     });
@@ -267,11 +309,40 @@ async function newStockCliclHandler() {
       throw new Error("Network response was not ok");
     }
 
+    alert(
+      `商品の登録が完了しました！😆🎉\n\n【登録内容】\n商品名：${stockInfo.name}\n価格：${stockInfo.price}\n個数：${stockInfo.all}`,
+    );
     const result = await response.json();
-    console.log("Success:", result);
+    console.log("Success to save stock data:", result);
 
     name.value = "";
     price.value = "";
     all.value = "";
   }
+}
+
+async function deleteStock(stock: StockType) {
+  const response = await fetch("/api/database", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      type: "goods",
+      data: {
+        is_delete: true,
+        data: stock,
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Network response was not ok");
+  }
+
+  alert(
+    `商品の削除が完了しました！😆🎉\n\n【削除した商品】\n商品名：${stock.name}\n価格：${stock.price}\n個数：${stock.all}`,
+  );
+  const result = await response.json();
+  console.log("Success to save stock data:", result);
 }

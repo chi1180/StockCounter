@@ -1,12 +1,15 @@
 "use client";
 
-import type { BoughtType, GoodsType } from "@/lib/types";
 import LineChartGraph from "./LineChartGraph";
 import { useEffect, useState } from "react";
 import BarChartGraph from "./BarChartGraph";
+import type { MutableDataPoint } from "./props";
+
+// Update DataTuple to use array of BoughtType
+type DataTuple = [MutableDataPoint[], Array<string>];
 
 export default function BoughtGraph() {
-  const [data, setData] = useState<[BoughtType, GoodsType]>();
+  const [data, setData] = useState<DataTuple | undefined>();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -27,29 +30,29 @@ export default function BoughtGraph() {
     // return () => clearInterval(interval);
   }, []);
 
-  if (data) {
-    if (data.at(0) && data.at(1)) {
-      return (
-        <>
-          <div className="flex items-center gap-2 py-12">
-            <div className="h-14 w-1.5 bg-(--accent-normal)" />
-            <h2 className="text-4xl">売上推移</h2>
-          </div>
-          <div className="bg-(--light) p-12 rounded-lg">
-            <LineChartGraph data={data.at(0)} goods={data.at(1)} />
-          </div>
-          {/* sep */}
-          <div className="flex items-center gap-2 py-12">
-            <div className="h-14 w-1.5 bg-(--accent-normal)" />
-            <h2 className="text-4xl">売上合計</h2>
-          </div>
-          <div className="bg-(--light) p-12 rounded-lg">
-            <BarChartGraph data={data.at(0)} goods={data.at(1)} />
-          </div>
-        </>
-      );
-    }
+  if (!data) {
+    return null;
   }
 
-  return <></>;
+  const [boughtData, goods] = data;
+
+  return (
+    <>
+      <div className="flex items-center gap-2 py-12">
+        <div className="h-14 w-1.5 bg-(--accent-normal)" />
+        <h2 className="text-4xl">売上推移</h2>
+      </div>
+      <div className="bg-(--light) p-12 rounded-lg">
+        <LineChartGraph data={boughtData} goods={goods} />
+      </div>
+      {/* sep */}
+      <div className="flex items-center gap-2 py-12">
+        <div className="h-14 w-1.5 bg-(--accent-normal)" />
+        <h2 className="text-4xl">売上合計</h2>
+      </div>
+      <div className="bg-(--light) p-12 rounded-lg">
+        <BarChartGraph data={boughtData} goods={goods} />
+      </div>
+    </>
+  );
 }

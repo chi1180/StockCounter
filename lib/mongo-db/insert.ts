@@ -40,7 +40,9 @@ async function insert(
         const newLog: boughtLogsType = [];
         for (const log of boughtData.logs) {
           if (log.counts[document.name]) delete log.counts[document.name];
-          newLog.push(log);
+
+          // Check if log has another stock's count
+          if (Object.keys(log.counts).length > 0) newLog.push(log);
         }
 
         await remove({ type: "bought" });
@@ -59,7 +61,9 @@ async function insert(
     const result = await collection.insertOne(existingDocument);
     return result;
   } catch (error) {
-    console.log(`[--ERROR--] Failed to load data\n${error}`);
+    console.log(
+      `[--ERROR--] Failed to load data in lib/mongo-db/insert.ts L.64\n${error}`,
+    );
   } finally {
     await client.close();
   }

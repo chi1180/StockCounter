@@ -10,13 +10,21 @@ export default function Counter() {
   const [tab, setTab] = useState("");
   const [stocks, setStocks] = useState<GoodsType>();
   const [isProcessing, setIsProcessing] = useState<Set<string>>(new Set());
+  const [visibleStocks, setVisibleStocks] = useState<Set<string>>(new Set());
   const isUpdating = useRef(0);
-  const fetchIdRef = useRef(0); // リクエストIDを管理
+  const fetchIdRef = useRef(0);
+  const isInitialized = useRef(false);
+
+  useEffect(() => {
+    if (stocks && !isInitialized.current) {
+      setVisibleStocks(new Set(stocks.map((stock) => stock.name)));
+      isInitialized.current = true;
+    }
+  }, [stocks]);
 
   const fetchData = useCallback(async (forceUpdate = false) => {
     if (!forceUpdate && isUpdating.current > 0) return;
 
-    // 新しいリクエストIDを生成
     const currentFetchId = ++fetchIdRef.current;
     console.log(`[--DEBUG--] Starting fetchData with ID: ${currentFetchId}`);
 
@@ -24,12 +32,11 @@ export default function Counter() {
       const apiResponse = await fetch("/api/database?for=stocks-counter");
       const result = await apiResponse.json();
 
-      // レスポンス到着時点で、より新しいリクエストが発行されていないかチェック
       if (currentFetchId !== fetchIdRef.current) {
         console.log(
           `[--DEBUG--] Ignoring outdated fetch result (ID: ${currentFetchId}, current: ${fetchIdRef.current})`,
         );
-        return; // 古いレスポンスは無視
+        return;
       }
 
       if (apiResponse.status === 200) {
@@ -60,7 +67,7 @@ export default function Counter() {
   useEffect(() => {
     fetchData();
 
-    if (process.env.NODE_ENV === "development") {
+    if (process.env.NODE_ENV !== "development") {
       const interval = setInterval(fetchData, 1000);
       return () => clearInterval(interval);
     }
@@ -68,25 +75,21 @@ export default function Counter() {
 
   const decreaseStock = useCallback(
     async (targetName: string) => {
-      // 既に処理中の場合は早期リターン
       if (isProcessing.has(targetName)) {
         console.log(`[--DEBUG--] ${targetName} is already being processed`);
         return;
       }
 
-      // 在庫が0の場合は処理しない
       const currentStock = stocks?.find((stock) => stock.name === targetName);
       if (!currentStock || currentStock.all <= 0) {
         console.log(`[--DEBUG--] ${targetName} is out of stock`);
         return;
       }
 
-      // 処理中フラグを設定
       setIsProcessing((prev) => new Set([...prev, targetName]));
       isUpdating.current++;
 
       try {
-        // サーバーにログを保存
         const thisTime = new Date();
         thisTime.setSeconds(0);
         thisTime.setMilliseconds(0);
@@ -119,7 +122,6 @@ export default function Counter() {
         const result = await response.json();
         console.log("[--DEBUG--] Successfully saved log:", result);
 
-        // サーバー処理成功後、ローカル状態を更新（悲観的更新）
         setStocks((prevStocks) => {
           if (!prevStocks) return prevStocks;
 
@@ -135,11 +137,8 @@ export default function Counter() {
           `[--ERROR--] Failed to decrease stock for ${targetName}:`,
           error,
         );
-
-        // エラー時は状態を変更せず、ユーザーに通知
         alert(`在庫の更新に失敗しました: ${targetName}`);
       } finally {
-        // 処理中フラグをクリア
         setIsProcessing((prev) => {
           const newSet = new Set(prev);
           newSet.delete(targetName);
@@ -151,20 +150,30 @@ export default function Counter() {
           `[--DEBUG--] Processing completed for ${targetName}. isUpdating: ${isUpdating.current}`,
         );
 
-        // 最新データを取得（エラーが発生した場合の整合性確保）
         await fetchData();
       }
     },
     [stocks, fetchData, isProcessing],
   );
 
-  // ボタンが無効化されるべきかどうかを判定
   const isButtonDisabled = useCallback(
     (stockName: string, stockCount: number) => {
       return stockCount === 0 || isProcessing.has(stockName);
     },
     [isProcessing],
   );
+
+  const toggleStockVisibility = useCallback((stockName: string) => {
+    setVisibleStocks((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(stockName)) {
+        newSet.delete(stockName);
+      } else {
+        newSet.add(stockName);
+      }
+      return newSet;
+    });
+  }, []);
 
   return (
     <>
@@ -192,42 +201,60 @@ export default function Counter() {
             </h3>
           </div>
 
+          {viewStyle === "card" && (
+            <div className="flex flex-wrap gap-4 mb-6">
+              {stocks.map(({ name }) => (
+                <label key={name} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={visibleStocks.has(name)}
+                    onChange={() => toggleStockVisibility(name)}
+                    className="w-6 aspect-square"
+                  />
+                  <span className="text-2xl">{name}</span>
+                </label>
+              ))}
+            </div>
+          )}
+
           <div className="flex flex-wrap gap-4">
             {viewStyle === "card" ? (
-              stocks.map(({ name, all }) => {
-                const isDisabled = isButtonDisabled(name, all);
-                const isCurrentlyProcessing = isProcessing.has(name);
+              stocks
+                .filter(({ name }) => visibleStocks.has(name))
+                .map(({ name, all }) => {
+                  const isDisabled = isButtonDisabled(name, all);
+                  const isCurrentlyProcessing = isProcessing.has(name);
 
-                return (
-                  <div
-                    key={name}
-                    className="w-1/2 max-w-96 p-2 bg-white rounded-md shadow-md mb-4"
-                  >
-                    <h2 className="text-2xl pl-2 pb-2">{name}</h2>
-                    <hr />
-                    <div className="p-2">
-                      <div className="flex flex-col gap-6">
-                        <div className="flex gap-2 py-4 justify-center items-end">
-                          <p className="text-5xl">{all}</p>
-                          <p className="text-2xl">個</p>
+                  return (
+                    <div
+                      key={name}
+                      className="w-1/2 max-w-96 p-2 bg-white rounded-md shadow-md mb-4"
+                    >
+                      <h2 className="text-3xl pl-2 pb-2">{name}</h2>
+                      <hr />
+                      <div className="p-2">
+                        <div className="flex flex-col gap-6">
+                          <div className="flex gap-2 py-4 justify-center items-end">
+                            <p className="text-5xl">{all}</p>
+                            <p className="text-2xl">個</p>
+                          </div>
+                          <button
+                            className={`w-full aspect-square rounded-full shadow-md text-3xl transition-all duration-300 cursor-pointer ${
+                              isDisabled
+                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                : "bg-(--accent-normal) hover:opacity-60"
+                            }`}
+                            type="button"
+                            disabled={isDisabled}
+                            onClick={() => decreaseStock(name)}
+                          >
+                            {isCurrentlyProcessing ? "処理中..." : "一個売れた"}
+                          </button>
                         </div>
-                        <button
-                          className={`w-full aspect-square rounded-full shadow-md text-3xl transition-all duration-300 cursor-pointer ${
-                            isDisabled
-                              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                              : "bg-(--accent-normal) hover:opacity-60"
-                          }`}
-                          type="button"
-                          disabled={isDisabled}
-                          onClick={() => decreaseStock(name)}
-                        >
-                          {isCurrentlyProcessing ? "処理中..." : "一個売れた"}
-                        </button>
                       </div>
                     </div>
-                  </div>
-                );
-              })
+                  );
+                })
             ) : (
               <>
                 <div className="flex h-16 p-1 bg-white w-full gap-1">
@@ -235,11 +262,13 @@ export default function Counter() {
                     return (
                       <div
                         key={name}
-                        className={`h-full px-4 py-1 flex flex-col justify-center cursor-pointer hover:opacity-100 transition-all duration-300 bg-(--base) rounded-t-md ${tab === name ? "" : "opacity-60"}`}
+                        className={`h-full px-4 py-1 flex flex-col justify-center cursor-pointer hover:opacity-100 transition-all duration-300 bg-(--base) rounded-t-md ${
+                          tab === name ? "" : "opacity-60"
+                        }`}
                         onKeyUp={() => {}}
                         onClick={() => setTab(name)}
                       >
-                        <p className="text-xl">{name}</p>
+                        <p className="text-2xl">{name}</p>
                       </div>
                     );
                   })}

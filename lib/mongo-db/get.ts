@@ -17,3 +17,4 @@ async function get(query: { type: string; [key: string]: any }) {
     await client.close();
   }
 }
+export { get };

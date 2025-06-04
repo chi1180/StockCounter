@@ -1,17 +1,10 @@
 export type GoodsType = StockType[];
 
-export type BoughtType = {
-  name: string;
-  log: {
-    time: Date;
-    count: string;
-  };
-};
-
 export type StockType = {
   name: string;
   price: number;
   all: number;
+  sold?: number;
 };
 
 export type GoodsInfoType = {

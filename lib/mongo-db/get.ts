@@ -1,18 +1,17 @@
 import { MongoClient } from "mongodb";
 import { uri } from "./init";
 
-async function get(query: { type: string; [key: string]: any }) {
+async function get(query: { type: string }) {
   const client = new MongoClient(uri);
 
   try {
     const database = client.db("stocks");
-    const collectionName = query.type === "goods" ? "goods" : "bought";
-    const collection = database.collection(collectionName);
+    const collection = database.collection("bought");
     const result = await collection.findOne(query);
     return result;
   } catch (error) {
     console.error(`[--ERROR--] Failed to load data\n${error}`);
-    throw error; // エラーを上位に伝播させる
+    throw error;
   } finally {
     await client.close();
   }

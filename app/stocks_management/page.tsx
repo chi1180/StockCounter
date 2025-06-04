@@ -46,6 +46,27 @@ export default function StocksManaagement() {
     setFormData(dialog);
   }, [dialog]);
 
+  const downloadBtnClickHandler = async () => {
+    try {
+      const response = await fetch("/api/download-stocks");
+      if (!response.ok)
+        throw new Error(`Download failed as ${JSON.stringify(response)}`);
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `stocks_data_${new Date().toISOString().split("T")[0]}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+    } catch (error) {
+      console.log("[---ERROR---] Download failed:", error);
+      alert("ダウンロードに失敗しました。");
+    }
+  };
+
   if (data) {
     return (
       <div
@@ -147,9 +168,28 @@ export default function StocksManaagement() {
               </tbody>
             </table>
           </div>
+
+          {/* sep */}
+
+          <div className="flex items-center gap-2 py-12">
+            <div className="h-14 w-1.5 bg-(--accent-normal)" />
+            <h2 className="text-4xl">データのダウンロード</h2>
+          </div>
+          <div className="bg-(--light) p-12 rounded-lg">
+            <p className="text-xl pb-4">
+              登録した商品についてのデータ（売上率、売上合計金額など）をダウンロードします。
+            </p>
+            <button
+              type="button"
+              onClick={() => downloadBtnClickHandler()}
+              className="w-40 h-16 bg-(--accent-normal) rounded-md shadow-md hover:opacity-60 cursor-pointer transition-all duration-300 text-lg"
+            >
+              ダウンロード
+            </button>
+          </div>
         </main>
 
-        {/* sep */}
+        {/* Dialog elements */}
 
         <div
           className={`w-screen h-screen top-0 absolute ${dialog.name ? "block" : "hidden"} transition-all duration-300`}

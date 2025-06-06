@@ -35,7 +35,7 @@ export default function Counter() {
           for (const stock of result.stocks.goods) {
             for (const log of result.logs.logs) {
               if (log.counts[stock.name]) stock.all -= log.counts[stock.name];
-              if (processingStocks.has(stock.name)) stock.all--;
+              // if (processingStocks.has(stock.name)) stock.all--;
             }
           }
 

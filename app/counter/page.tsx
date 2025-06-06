@@ -90,7 +90,9 @@ export default function Counter() {
         );
 
       const result = await response.json();
-      console.log(`[--INFO--] Successfully saved log as:\n${result}`);
+      console.log(
+        `[--INFO--] Successfully saved log as:\n${JSON.stringify(result)}`,
+      );
     } catch (error) {
       console.log(
         `[--ERROR--] Failed to decrease stock for ${targetStockName} with:\n${error}`,

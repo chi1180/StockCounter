@@ -1,5 +1,6 @@
 "use client";
 
+import Footer from "@/components/Footer";
 import Header from "@/components/header";
 import Loading from "@/components/loading";
 import type { GoodsType, StockType } from "@/lib/types";
@@ -46,8 +47,14 @@ export default function StocksManaagement() {
     setFormData(dialog);
   }, [dialog]);
 
-  const downloadBtnClickHandler = async () => {
+  const downloadBtnClickHandler = async (
+    eventTargetElem: HTMLButtonElement,
+  ) => {
+    const initialInnerText = eventTargetElem.innerText;
     try {
+      eventTargetElem.disabled = true;
+      eventTargetElem.innerText = "ダウンロード中...";
+
       const response = await fetch("/api/download-stocks");
       if (!response.ok)
         throw new Error(`Download failed as ${JSON.stringify(response)}`);
@@ -64,6 +71,9 @@ export default function StocksManaagement() {
     } catch (error) {
       console.log("[---ERROR---] Download failed:", error);
       alert("ダウンロードに失敗しました。");
+    } finally {
+      eventTargetElem.disabled = false;
+      eventTargetElem.innerText = initialInnerText;
     }
   };
 
@@ -75,49 +85,49 @@ export default function StocksManaagement() {
         <Header />
 
         <main className="p-6">
-          <div className="flex items-center gap-2 py-12">
-            <div className="h-14 w-1.5 bg-(--accent-normal)" />
-            <h2 className="text-4xl">商品の登録</h2>
+          <div className="flex items-center gap-1 sm:gap-2 py-6 sm:py-12">
+            <div className="h-10 sm:h-14 w-1 sm:w-1.5 bg-(--accent-normal)" />
+            <h2 className="text-2xl sm:text-4xl">商品の登録</h2>
           </div>
-          <div className="bg-(--light) p-12 rounded-lg">
+          <div className="bg-(--light) p-6 sm:p-12 rounded-md sm:rounded-lg">
             <div className="w-full max-w-[800] aspect-video">
-              <p className="text-2xl pl-2">商品名</p>
+              <p className="text-xl sm:text-2xl pl-1 sm:pl-2">商品名</p>
               <input
                 type="text"
                 autoComplete="false"
                 placeholder={"ここに商品名を入力してください"}
-                className="py-1 px-2 h-16 text-2xl rounded-md my-2 border-2 border-(--base) w-full focus:outline-none"
+                className="py-0.5 sm:py-1 px-1 sm:px-2 h-12 sm:h-16 text-xl sm:text-2xl rounded-md my-1 sm:my-2 border-2 border-(--base) w-full focus:outline-none"
                 id="new_stock_input_name"
               />
 
-              <div className="h-4" />
+              <div className="h-2 sm:h-4" />
 
-              <div className="flex gap-4">
+              <div className="flex gap-2 sm:gap-4">
                 <div>
-                  <p className="text-2xl pl-2">価格</p>
+                  <p className="text-xl sm:text-2xl pl-1 sm:pl-2">価格</p>
                   <input
                     type="number"
                     min={0}
-                    className="py-1 px-2 h-16 text-2xl rounded-md my-2 border-2 border-(--base) w-full focus:outline-none"
+                    className="py-0.5 sm:py-1 px-1 sm:px-2 h-12 sm:h-16 text-xl sm:text-2xl rounded-md my-1 sm:my-2 border-2 border-(--base) w-full focus:outline-none"
                     id="new_stock_input_price"
                   />
                 </div>
 
                 <div>
-                  <p className="text-2xl pl-2">個数</p>
+                  <p className="text-xl sm:text-2xl pl-1 sm:pl-2">個数</p>
                   <input
                     type="number"
                     min={0}
-                    className="py-1 px-2 h-16 text-2xl rounded-md my-2 border-2 border-(--base) w-full focus:outline-none"
+                    className="py-0.5 sm:py-1 px-1 sm:px-2 h-12 sm:h-16 text-xl sm:text-2xl rounded-md my-1 sm:my-2 border-2 border-(--base) w-full focus:outline-none"
                     id="new_stock_input_all"
                   />
                 </div>
               </div>
 
-              <div className="pt-16 flex gap-4 justify-end *:w-30 *:h-16 *:rounded-md *:text-xl *:font-medium">
+              <div className="pt-12 sm:pt-16 flex gap-2 sm:gap-4 justify-end *:w-30 *:h-16 *:rounded-md *:text-xl *:font-medium">
                 <button
                   type="button"
-                  className="bg-(--accent-normal) text-white transition-all duration-300 hover:opacity-60"
+                  className="bg-(--accent-normal) text-white transition-all duration-300 hover:opacity-60 cursor-pointer"
                   onClick={() => {
                     const goods: Array<string> = [];
                     for (const stock of data) {
@@ -134,14 +144,14 @@ export default function StocksManaagement() {
 
           {/* Existing sotkcs */}
 
-          <div className="flex items-center gap-2 py-12">
-            <div className="h-14 w-1.5 bg-(--accent-normal)" />
-            <h2 className="text-4xl">登録済みの商品</h2>
+          <div className="flex items-center gap-1 sm:gap-2 py-6 sm:py-12">
+            <div className="h-10 sm:h-14 w-1 sm:w-1.5 bg-(--accent-normal)" />
+            <h2 className="text-2xl sm:text-4xl">登録済みの商品</h2>
           </div>
-          <div className="bg-(--light) p-12 rounded-lg">
+          <div className="bg-(--light) p-6 sm:p-12 rounded-md sm:rounded-lg">
             <table className="w-full max-w-[800]">
-              <thead className="bg-(--accent-sub) px-4 py-2">
-                <tr className="*:text-xl *:py-2 px-3">
+              <thead className="bg-(--accent-sub) px-2 sm:px-4 py-1 sm:py-2">
+                <tr className="*:text-base sm:*:text-xl *:py-1 sm:*:py-2 px-3">
                   <th>商品名</th>
                   <th>価格</th>
                   <th>個数</th>
@@ -153,15 +163,19 @@ export default function StocksManaagement() {
                   return (
                     <tr
                       key={stock.name}
-                      className="*:py-2 *:px-3 border-b-(--accent-sub) border-b-2 nth-of-type-[even]:bg-(--base) last-of-type:border-b-4 text-xl hover:!bg-(--accent-normal) hover:opacity-60 cursor-pointer transition-all duration-300"
+                      className="*:py-1 sm:*:py-2 *:px-1.5 sm:*:px-3 border-b-(--accent-sub) border-b sm:border-b-2 nth-of-type-[even]:bg-(--base) last-of-type:border-b-4 text-base sm:text-xl hover:!bg-(--accent-normal) hover:opacity-60 cursor-pointer transition-all duration-300"
                       onClick={() => {
                         setDialog(stock);
                       }}
                       onKeyUp={() => {}}
                     >
                       <td>{stock.name}</td>
-                      <td className="text-end text-xl">{stock.price}</td>
-                      <td className="text-end text-xl">{stock.all}</td>
+                      <td className="text-end text-base sm:text-xl">
+                        {stock.price}
+                      </td>
+                      <td className="text-end text-base sm:text-xl">
+                        {stock.all}
+                      </td>
                     </tr>
                   );
                 })}
@@ -171,21 +185,25 @@ export default function StocksManaagement() {
 
           {/* sep */}
 
-          <div className="flex items-center gap-2 py-12">
-            <div className="h-14 w-1.5 bg-(--accent-normal)" />
-            <h2 className="text-4xl">データのダウンロード</h2>
+          <div className="flex items-center gap-1 sm:gap-2 py-6 sm:py-12">
+            <div className="h-10 sm:h-14 w-1 sm:w-1.5 bg-(--accent-normal)" />
+            <h2 className="text-2xl sm:text-4xl">データのダウンロード</h2>
           </div>
-          <div className="bg-(--light) p-12 rounded-lg">
-            <p className="text-xl pb-4">
+          <div className="bg-(--light) p-6 sm:p-12 rounded-md sm:rounded-lg">
+            <p className="text-base sm:text-xl pb-2 sm:pb-4">
               登録した商品についてのデータ（売上率、売上合計金額など）をダウンロードします。
             </p>
-            <button
-              type="button"
-              onClick={() => downloadBtnClickHandler()}
-              className="w-40 h-16 bg-(--accent-normal) rounded-md shadow-md hover:opacity-60 cursor-pointer transition-all duration-300 text-lg"
-            >
-              ダウンロード
-            </button>
+            <div className="pt-8 sm:pt-16 flex gap-2 sm:gap-4 justify-start *:w-48 *:h-16 *:rounded-md *:text-xl *:font-medium">
+              <button
+                type="button"
+                onClick={(event) =>
+                  downloadBtnClickHandler(event.target as HTMLButtonElement)
+                }
+                className="bg-(--accent-normal) text-white transition-all duration-300 hover:opacity-60 cursor-pointer"
+              >
+                ダウンロード
+              </button>
+            </div>
           </div>
         </main>
 
@@ -196,9 +214,11 @@ export default function StocksManaagement() {
         >
           <div className="w-full h-full relative">
             <div className="w-full h-full opacity-60 bg-black absolute top-0" />
-            <div className="w-full max-w-[800] aspect-video opacity-100 *:opacity-100 bg-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-6 rounded-lg">
-              <h1 className="text-4xl text-center pb-12">登録済み商品の変更</h1>
-              <p className="text-2xl pl-2">商品名</p>
+            <div className="w-full max-w-[800] aspect-video opacity-100 *:opacity-100 bg-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-3 sm:p-6 rounded-md sm:rounded-lg">
+              <h1 className="text-2xl sm:text-4xl text-center pb-8 sm:pb-12">
+                登録済み商品の変更
+              </h1>
+              <p className="text-xl sm:text-2xl pl-1 sm:pl-2">商品名</p>
               <input
                 type="text"
                 id="exist_stock_input_name"
@@ -209,14 +229,14 @@ export default function StocksManaagement() {
                 }
                 autoComplete="false"
                 placeholder={"ここに商品名を入力してください"}
-                className="py-1 px-2 h-16 text-2xl rounded-md my-2 border-2 border-(--base) w-full focus:outline-none"
+                className="py-0.5 sm:py-1 px-1 sm:px-2 h-12 sm:h-16 text-xl sm:text-2xl rounded-md my-1 sm:my-2 border-2 border-(--base) w-full focus:outline-none"
               />
 
               <div className="h-4" />
 
-              <div className="flex gap-4">
+              <div className="flex gap-2 sm:gap-4">
                 <div>
-                  <p className="text-2xl pl-2">価格</p>
+                  <p className="text-xl sm:text-2xl pl-1 sm:pl-2">価格</p>
                   <input
                     type="number"
                     id="exist_stock_input_price"
@@ -228,12 +248,12 @@ export default function StocksManaagement() {
                       })
                     }
                     min={0}
-                    className="py-1 px-2 h-16 text-2xl rounded-md my-2 border-2 border-(--base) w-full focus:outline-none"
+                    className="py-0.5 sm:py-1 px-1 sm:px-2 h-12 sm:h-16 text-xl sm:text-2xl rounded-md my-1 sm:my-2 border-2 border-(--base) w-full focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <p className="text-2xl pl-2">個数</p>
+                  <p className="text-xl sm:text-2xl pl-1 sm:pl-2">個数</p>
                   <input
                     type="number"
                     id="exist_stock_input_all"
@@ -245,12 +265,12 @@ export default function StocksManaagement() {
                       })
                     }
                     min={0}
-                    className="py-1 px-2 h-16 text-2xl rounded-md my-2 border-2 border-(--base) w-full focus:outline-none"
+                    className="py-0.5 sm:py-1 px-1 sm:px-2 h-12 sm:h-16 text-xl sm:text-2xl rounded-md my-1 sm:my-2 border-2 border-(--base) w-full focus:outline-none"
                   />
                 </div>
               </div>
 
-              <div className="pt-16 flex gap-4 justify-end *:w-30 *:h-16 *:rounded-md *:text-xl *:font-medium">
+              <div className="pt-16 flex gap-2 sm:gap-4 justify-around sm:justify-end *:w-30 *:h-16 *:rounded-md *:text-xl *:font-medium">
                 <button
                   type="button"
                   className="bg-(--accent-normal) text-white transition-all duration-300 hover:opacity-60"
@@ -298,6 +318,8 @@ export default function StocksManaagement() {
             </div>
           </div>
         </div>
+
+        <Footer />
       </div>
     );
   }
@@ -306,6 +328,7 @@ export default function StocksManaagement() {
     <>
       <Header />
       <Loading />
+      <Footer />
     </>
   );
 }

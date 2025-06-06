@@ -45,8 +45,7 @@ export default function LineChartGraph({ data, goods }: LineChartGraphProps) {
           <CartesianGrid stroke={Colors.font} strokeDasharray="1 1" />
           <XAxis dataKey="time" />
           <YAxis />
-          <Tooltip />
-          <Legend
+          {/* <Legend
             width={100}
             wrapperStyle={{
               top: -10,
@@ -57,7 +56,8 @@ export default function LineChartGraph({ data, goods }: LineChartGraphProps) {
               borderRadius: 6,
               lineHeight: "30px",
             }}
-          />
+          /> */}
+          <Tooltip />
         </LineChart>
       </ResponsiveContainer>
     </div>

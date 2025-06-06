@@ -43,7 +43,7 @@ export default function BarChartGraph({ data, goods }: LineChartGraphProps) {
           <CartesianGrid stroke={Colors.font} strokeDasharray="1 1" />
           <Tooltip />
           <YAxis dataKey={"count"} />
-          <Legend
+          {/* <Legend
             width={100}
             wrapperStyle={{
               top: -10,
@@ -54,7 +54,7 @@ export default function BarChartGraph({ data, goods }: LineChartGraphProps) {
               borderRadius: 6,
               lineHeight: "30px",
             }}
-          />
+          /> */}
           {goods.map((good, index) => {
             const colors = colorSchameGenerator(
               Colors["accent-normal"],

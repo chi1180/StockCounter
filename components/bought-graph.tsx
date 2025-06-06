@@ -41,19 +41,19 @@ export default function BoughtGraph() {
 
   return (
     <>
-      <div className="flex items-center gap-2 py-12">
-        <div className="h-14 w-1.5 bg-(--accent-normal)" />
-        <h2 className="text-4xl">売上推移</h2>
+      <div className="flex items-center gap-1 sm:gap-2 py-6 sm:py-12">
+        <div className="h-10 sm:h-14 w-1 sm:w-1.5 bg-(--accent-normal)" />
+        <h2 className="text-2xl sm:text-4xl">売上推移</h2>
       </div>
-      <div className="bg-(--light) p-12 pb-0 rounded-lg">
+      <div className="bg-(--light) p-4 sm:p-12 pb-0 rounded-md sm:rounded-lg">
         <LineChartGraph data={boughtData} goods={goods} />
       </div>
       {/* sep */}
-      <div className="flex items-center gap-2 py-12">
-        <div className="h-14 w-1.5 bg-(--accent-normal)" />
-        <h2 className="text-4xl">売上合計</h2>
+      <div className="flex items-center gap-1 sm:gap-2 py-6 sm:py-12">
+        <div className="h-10 sm:h-14 w-1 sm:w-1.5 bg-(--accent-normal)" />
+        <h2 className="text-2xl sm:text-4xl">売上合計</h2>
       </div>
-      <div className="bg-(--light) p-12 pb-0 rounded-lg">
+      <div className="bg-(--light) p-4 sm:p-12 pb-0 rounded-md sm:rounded-lg">
         <BarChartGraph data={boughtData} goods={goods} />
       </div>
     </>
